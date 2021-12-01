@@ -4,16 +4,19 @@ from advent_of_code.utilities import read_lines
 
 
 def increased_window_depth_measurements(depth_measurements):
-    window_depth_measurements = list(
+    return increased_depth_measurements(window_depth_measurements(depth_measurements))
+
+
+def window_depth_measurements(depth_measurements):
+    return list(
         map(sum, zip(depth_measurements, depth_measurements[1:], depth_measurements[2:])))
-    return increased_depth_measurements(window_depth_measurements)
 
 
 def increased_depth_measurements(depth_measurements):
     return len(list(filter(lambda t: t[1] > t[0], zip(depth_measurements, depth_measurements[1:]))))
 
 
-class Day1Test(unittest.TestCase):
+class SonarSweepTest(unittest.TestCase):
     def test_increased_depth_measurements(self):
         depth_measurements = [199, 200, 208, 210, 200, 207, 240, 269, 260, 263]
         self.assertEqual(7, increased_depth_measurements(depth_measurements))
