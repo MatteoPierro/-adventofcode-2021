@@ -45,12 +45,34 @@ def score(boards, drawn_numbers):
     raise 'No Winner something went wrong!!!'
 
 
-def parse_drawn_numbers(l):
-    return list(map(int, l.split(',')))
+def score_last_winner(boards, drawn_numbers):
+    winning_board = set()
+    for number in drawn_numbers:
+        for board in boards:
+            board.extracted_number(number)
+            if board.has_won():
+                winning_board.add(board)
+            if len(boards) == len(winning_board):
+                return number * board.sum()
+    raise 'No Last Winner something went wrong!!!'
+
+
+def parse_drawn_numbers(drawn_numbers):
+    return list(map(int, drawn_numbers.split(',')))
 
 
 def parse_row(row):
     return list(map(int, row.split()))
+
+
+def input_puzzle():
+    puzzle_input = read_lines('./input_day4.txt')
+    drawn_numbers = parse_drawn_numbers(puzzle_input[0])
+    boards = []
+    for index in range(2, len(puzzle_input), 6):
+        raw_board = [parse_row(row) for row in puzzle_input[index: index + 5]]
+        boards.append(Board(raw_board))
+    return drawn_numbers, boards
 
 
 class GiantSquidTest(unittest.TestCase):
@@ -96,10 +118,31 @@ class GiantSquidTest(unittest.TestCase):
         self.assertEqual(4512, score(boards, drawn_numbers))
 
     def test_puzzle1(self):
-        puzzle_input = read_lines('./input_day4.txt')
-        drawn_numbers = parse_drawn_numbers(puzzle_input[0])
-        boards = []
-        for index in range(2, len(puzzle_input), 6):
-            raw_board = [parse_row(row) for row in puzzle_input[index: index + 5]]
-            boards.append(Board(raw_board))
+        [drawn_numbers, boards] = input_puzzle()
         self.assertEqual(29440, score(boards, drawn_numbers))
+
+    def test_score_last_winner(self):
+        boards = [
+            Board([[22, 13, 17, 11, 0],
+                   [8, 2, 23, 4, 24],
+                   [21, 9, 14, 16, 7],
+                   [6, 10, 3, 18, 5],
+                   [1, 12, 20, 15, 19]]),
+            Board([[3, 15, 0, 2, 22],
+                   [9, 18, 13, 17, 5],
+                   [19, 8, 7, 25, 23],
+                   [20, 11, 10, 24, 4],
+                   [14, 21, 16, 12, 6]]),
+            Board([[14, 21, 17, 24, 4],
+                   [10, 16, 15, 9, 19],
+                   [18, 8, 23, 26, 20],
+                   [22, 11, 13, 6, 5],
+                   [2, 0, 12, 3, 7]])
+        ]
+        drawn_numbers = [7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24, 10, 16, 13, 6, 15, 25, 12, 22, 18, 20, 8, 19, 3, 26,
+                         1]
+        self.assertEqual(1924, score_last_winner(boards, drawn_numbers))
+
+    def test_puzzle2(self):
+        [drawn_numbers, boards] = input_puzzle()
+        self.assertEqual(13884, score_last_winner(boards, drawn_numbers))
