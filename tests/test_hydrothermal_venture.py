@@ -10,25 +10,25 @@ class Line:
         self.end = end
 
     def all_points(self):
-        min_x_point = min(self.start, self.end)
-        max_x_point = max(self.start, self.end)
+        first_point = min(self.start, self.end)
+        last_point = max(self.start, self.end)
         x_increment = self.calculate_x_increment()
         y_increment = self.calculate_y_increment()
-        points = [min_x_point]
-        while points[-1] != max_x_point:
-            last_point = points[-1]
-            points.append((last_point[0] + x_increment, last_point[1] + y_increment))
+        points = [first_point]
+        while points[-1] != last_point:
+            last_added_point = points[-1]
+            points.append((last_added_point[0] + x_increment, last_added_point[1] + y_increment))
         return points
 
     def calculate_x_increment(self):
         return 0 if self.is_vertical() else 1
 
     def calculate_y_increment(self):
-        min_x_point = min(self.start, self.end)
-        max_x_point = max(self.start, self.end)
-        if min_x_point[1] > max_x_point[1]:
+        first_point = min(self.start, self.end)
+        last_point = max(self.start, self.end)
+        if first_point[1] > last_point[1]:
             return -1
-        elif min_x_point[1] < max_x_point[1]:
+        elif first_point[1] < last_point[1]:
             return 1
         else:
             return 0
