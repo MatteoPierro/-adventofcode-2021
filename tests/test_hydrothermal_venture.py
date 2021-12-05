@@ -53,13 +53,15 @@ class Line:
 
 
 def number_of_points_with_two_or_more_occurrences(lines):
-    points = [point for line in horizontal_and_vertical_lines(lines) for point in line.all_points()]
-    point_occurrences = collections.Counter(points)
-    return len([elem for elem in point_occurrences.items() if elem[1] > 1])
+    return filtered_points_with_number_of_all_points_with_two_or_more_occurrences(lines, horizontal_and_vertical_lines)
 
 
 def number_of_all_points_with_two_or_more_occurrences(lines):
-    points = [point for line in lines for point in line.all_points()]
+    return filtered_points_with_number_of_all_points_with_two_or_more_occurrences(lines, lambda _: lines)
+
+
+def filtered_points_with_number_of_all_points_with_two_or_more_occurrences(lines, lines_filter):
+    points = [point for line in lines_filter(lines) for point in line.all_points()]
     point_occurrences = collections.Counter(points)
     return len([elem for elem in point_occurrences.items() if elem[1] > 1])
 
