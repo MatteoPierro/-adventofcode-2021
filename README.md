@@ -7,3 +7,4 @@
 - [Binary Diagnostic](./tests/test_binary_diagnostic.py)
 - [Giant Squid](./tests/test_giant_squid.py)
 - [Hydrothermal Venture](./tests/test_hydrothermal_venture.py)
+- [Lanternfish](./tests/test_lanternfish.py)
