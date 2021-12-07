@@ -8,3 +8,4 @@
 - [Giant Squid](./tests/test_giant_squid.py)
 - [Hydrothermal Venture](./tests/test_hydrothermal_venture.py)
 - [Lanternfish](./tests/test_lanternfish.py)
+- [The Treachery Of Whales](./tests/test_the_treachery_of_whales.py)
