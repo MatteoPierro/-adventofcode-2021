@@ -1,6 +1,8 @@
 import unittest
 from advent_of_code.utilities import read_lines
 from itertools import product
+from functools import reduce
+import operator
 
 NEIGHBOURS_RELATIVE_POSITIONS = [(0, -1), (1, 0), (0, 1), (-1, 0)]
 
@@ -46,37 +48,32 @@ def find_low_points_coordinates(heightmap):
     return low_points
 
 
-def calculate_basin_for_low_point(heightmap, low_point):
-    max_y = len(heightmap)
-    max_x = len(heightmap[0])
-    basin = []
-    for x in range(low_point[0], max_x):
-        if heightmap[low_point[1]][x] == 9:
-            break
-        for y in reversed(range(0, low_point[1])):
-            print(f"position {(x, y)}: value {heightmap[y][x]}")
-            if heightmap[y][x] == 9:
-                break
-            basin.append((x, y))
-        for y in range(low_point[1], max_y):
-            print(f"position {(x, y)}: value {heightmap[y][x]}")
-            if heightmap[y][x] == 9:
-                break
-            basin.append((x, y))
-    for x in reversed(range(0, low_point[0])):
-        if heightmap[low_point[1]][x] == 9:
-            break
-        for y in reversed(range(0, low_point[1])):
-            print(f"position {(x, y)}: value {heightmap[y][x]}")
-            if heightmap[y][x] == 9:
-                break
-            basin.append((x, y))
-        for y in range(low_point[1], max_y):
-            print(f"position {(x, y)}: value {heightmap[y][x]}")
-            if heightmap[y][x] == 9:
-                break
-            basin.append((x, y))
+def calculate_basin_for_low_point(low_point_coordinates, heightmap, basin):
+    nx = len(heightmap[0])
+    ny = len(heightmap)
+    (x, y) = low_point_coordinates
+    if x >= nx or x < 0:
+        return basin
+    if y >= ny or y < 0:
+        return basin
+    if heightmap[y][x] == 9:
+        return basin
+    if (x, y) in basin:
+        return basin
+    basin.append(low_point_coordinates)
+    calculate_basin_for_low_point((x - 1, y), heightmap, basin)
+    calculate_basin_for_low_point((x + 1, y), heightmap, basin)
+    calculate_basin_for_low_point((x, y + 1), heightmap, basin)
+    calculate_basin_for_low_point((x, y - 1), heightmap, basin)
     return basin
+
+
+def product_top_three_basin_lengths(heightmap):
+    low_points_coordinates = find_low_points_coordinates(heightmap)
+    top_three_basin_lengths = sorted(
+        [len(calculate_basin_for_low_point(lp, heightmap, [])) for lp in low_points_coordinates])[
+                              -3:]
+    return reduce(operator.mul, top_three_basin_lengths, 1)
 
 
 class SmokeBasinTest(unittest.TestCase):
@@ -99,13 +96,9 @@ class SmokeBasinTest(unittest.TestCase):
                          '8767896789',
                          '9899965678']
         heightmap = [parse_heightmap_row(row) for row in raw_heightmap]
-        low_points_coordinates = find_low_points_coordinates(heightmap)
-        self.assertEqual([(1, 0), (2, 2), (6, 4), (9, 0)], low_points_coordinates)
-        low_points = [heightmap[n[1]][n[0]] for n in low_points_coordinates]
-        self.assertEqual([1, 5, 5, 0], low_points)
-        self.assertEqual([(1, 0), (0, 0), (0, 1)], calculate_basin_for_low_point(heightmap, low_points_coordinates[0]))
-        self.assertEqual([(6, 3), (6, 4), (7, 3), (7, 2), (7, 4), (8, 3), (8, 4), (9, 4), (5, 4)],
-                         calculate_basin_for_low_point(heightmap, low_points_coordinates[-2]))
-        self.assertEqual([(9, 0), (9, 1), (9, 2), (8, 0), (8, 1), (7, 0), (6, 0), (6, 1), (5, 0)],
-                         calculate_basin_for_low_point(heightmap, low_points_coordinates[-1]))
-        self.assertEqual([(1, 0), (0, 0), (0, 1)], calculate_basin_for_low_point(heightmap, low_points_coordinates[1]))
+        self.assertEqual(1134, product_top_three_basin_lengths(heightmap))
+
+    def test_puzzle2(self):
+        raw_heightmap = read_lines('input_day9.txt')
+        heightmap = [parse_heightmap_row(row) for row in raw_heightmap]
+        self.assertEqual(1059300, product_top_three_basin_lengths(heightmap))
