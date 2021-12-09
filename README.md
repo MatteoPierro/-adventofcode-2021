@@ -10,3 +10,4 @@
 - [Lanternfish](./tests/test_lanternfish.py)
 - [The Treachery Of Whales](./tests/test_the_treachery_of_whales.py)
 - [Seven Segment Search](./tests/test_seven_segment_search.py)
+- [Smoke Basin](./tests/test_smoke_basin.py)
