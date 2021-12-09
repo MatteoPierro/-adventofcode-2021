@@ -1,5 +1,6 @@
 import unittest
 from advent_of_code.utilities import read_lines
+from itertools import product
 
 NEIGHBOURS_RELATIVE_POSITIONS = [(0, -1), (1, 0), (0, 1), (-1, 0)]
 
@@ -17,16 +18,15 @@ def calculate_risk_level(raw_heightmap):
     risk_level = 0
     max_y = len(heightmap)
     max_x = len(heightmap[0])
-    for x in range(max_x):
-        for y in range(max_y):
-            possible_neighbours_positions = calculate_possible_neighbours_positions((x, y))
-            neighbours_positions = [n for n in possible_neighbours_positions if
-                                    (0 <= n[0] < max_x and 0 <= n[1] < max_y)]
-            neighbours = [heightmap[n[1]][n[0]] for n in neighbours_positions]
-            min_neighbour = min(neighbours)
-            point = heightmap[y][x]
-            if point < min_neighbour:
-                risk_level += point + 1
+    for (x, y) in product(range(max_x), range(max_y)):
+        possible_neighbours_positions = calculate_possible_neighbours_positions((x, y))
+        neighbours_positions = [n for n in possible_neighbours_positions if
+                                (0 <= n[0] < max_x and 0 <= n[1] < max_y)]
+        neighbours = [heightmap[n[1]][n[0]] for n in neighbours_positions]
+        min_neighbour = min(neighbours)
+        point = heightmap[y][x]
+        if point < min_neighbour:
+            risk_level += point + 1
     return risk_level
 
 
