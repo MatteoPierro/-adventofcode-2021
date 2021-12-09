@@ -17,19 +17,7 @@ def calculate_possible_neighbours_positions(point):
 
 def calculate_risk_level(raw_heightmap):
     heightmap = [parse_heightmap_row(row) for row in raw_heightmap]
-    risk_level = 0
-    max_y = len(heightmap)
-    max_x = len(heightmap[0])
-    for (x, y) in product(range(max_x), range(max_y)):
-        possible_neighbours_positions = calculate_possible_neighbours_positions((x, y))
-        neighbours_positions = [n for n in possible_neighbours_positions if
-                                (0 <= n[0] < max_x and 0 <= n[1] < max_y)]
-        neighbours = [heightmap[n[1]][n[0]] for n in neighbours_positions]
-        min_neighbour = min(neighbours)
-        point = heightmap[y][x]
-        if point < min_neighbour:
-            risk_level += point + 1
-    return risk_level
+    return sum([heightmap[y][x] + 1 for (x, y) in find_low_points_coordinates(heightmap)])
 
 
 def find_low_points_coordinates(heightmap):
@@ -68,7 +56,8 @@ def calculate_basin_for_low_point(low_point_coordinates, heightmap, basin):
     return basin
 
 
-def product_top_three_basin_lengths(heightmap):
+def product_top_three_basin_lengths(raw_heightmap):
+    heightmap = [parse_heightmap_row(row) for row in raw_heightmap]
     low_points_coordinates = find_low_points_coordinates(heightmap)
     top_three_basin_lengths = sorted(
         [len(calculate_basin_for_low_point(lp, heightmap, [])) for lp in low_points_coordinates])[
@@ -95,10 +84,8 @@ class SmokeBasinTest(unittest.TestCase):
                          '9856789892',
                          '8767896789',
                          '9899965678']
-        heightmap = [parse_heightmap_row(row) for row in raw_heightmap]
-        self.assertEqual(1134, product_top_three_basin_lengths(heightmap))
+        self.assertEqual(1134, product_top_three_basin_lengths(raw_heightmap))
 
     def test_puzzle2(self):
         raw_heightmap = read_lines('input_day9.txt')
-        heightmap = [parse_heightmap_row(row) for row in raw_heightmap]
-        self.assertEqual(1059300, product_top_three_basin_lengths(heightmap))
+        self.assertEqual(1059300, product_top_three_basin_lengths(raw_heightmap))
