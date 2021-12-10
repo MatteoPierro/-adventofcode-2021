@@ -116,7 +116,7 @@ class SyntaxScoringTest(unittest.TestCase):
         self.assertEqual(1480781, calculate_score_remaining_to_close(list('}}>}>))))')))
         self.assertEqual(995444, calculate_score_remaining_to_close(list(']]}}]}]}>')))
 
-    def test_xyz(self):
+    def test_find_middle_score_of_remaining_to_close(self):
         lines = [
             '[({(<(())[]>[[{[]{<()<>>',
             '[(()[<>])]({[<{<<[]>>(',
