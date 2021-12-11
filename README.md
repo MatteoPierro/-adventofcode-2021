@@ -12,3 +12,4 @@
 - [Seven Segment Search](./tests/test_seven_segment_search.py)
 - [Smoke Basin](./tests/test_smoke_basin.py)
 - [Syntax Scoring](./tests/test_syntax_scoring.py)
+- [Dumbo Octopus](./tests/test_dumbo_octopus.py)
