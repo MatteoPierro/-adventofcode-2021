@@ -49,6 +49,12 @@ class World:
         potential_neighbours = [(point[0] + r[0], point[1] + r[1]) for r in RELATIVE_NEIGHBORS]
         return [p for p in potential_neighbours if 0 <= p[0] < 10 and 0 <= p[1] < 10]
 
+    def are_all_flashed(self):
+        return all(self.is_row_flashed(row) for row in self.levels)
+
+    def is_row_flashed(self, row):
+        return all(level == 0 for level in row)
+
     def __str__(self):
         lines = [''.join([str(v) for v in level]) for level in self.levels]
         return "\n".join(lines)
@@ -94,3 +100,34 @@ class DumboOctopusTest(unittest.TestCase):
         for _ in range(100):
             world.tick()
         self.assertEqual(1640, world.flashes)
+
+    def test_number_at_step_before_all_flashed(self):
+        raw_energy_levels = [
+            '5483143223',
+            '2745854711',
+            '5264556173',
+            '6141336146',
+            '6357385478',
+            '4167524645',
+            '2176841721',
+            '6882881134',
+            '4846848554',
+            '5283751526'
+        ]
+        energy_levels = [parse_energy_level_row(r) for r in raw_energy_levels]
+        world = World(energy_levels)
+        step = 0
+        while not world.are_all_flashed():
+            world.tick()
+            step += 1
+        self.assertEqual(195, step)
+
+    def test_puzzle_2(self):
+        raw_energy_levels = read_lines('input_day11.txt')
+        energy_levels = [parse_energy_level_row(r) for r in raw_energy_levels]
+        world = World(energy_levels)
+        step = 0
+        while not world.are_all_flashed():
+            world.tick()
+            step += 1
+        self.assertEqual(312, step)
