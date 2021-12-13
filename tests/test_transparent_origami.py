@@ -15,6 +15,8 @@ class TransparentPaper:
 
     def fold_horizontally(self, axes):
         new_max_y = max(axes, abs(self.max_y - axes)) - 1
+        print(self.max_y)
+        print(new_max_y)
         new_points = fold_horizontally(self.points, axes, self.max_y)
         return TransparentPaper(new_points, self.max_x, new_max_y)
 
@@ -47,17 +49,20 @@ def calculate_max_x(points):
 def fold_horizontally(points, axes, max_y):
     upper_points = [p for p in points if p[1] < axes]
     below_points = [p for p in points if p[1] > axes]
-    max_below = max(below_points, key=lambda p: p[1])[1]
-    new_points = [(p[0], abs(p[1] - max_below)) for p in below_points]
+    print(upper_points)
+    print(below_points)
+    new_points = [(p[0], abs(p[1] - max_y)) for p in below_points]
+    print(new_points)
     if max_y // 2 > axes:
         # print('playing with upper points')
-        to_add = max_y//2 - axes
-        print(upper_points)
+        # print(upper_points)
+        # print(to_add)
+        to_add = abs(max_y - 2 * axes)
         print(to_add)
         upper_points = [(p[0], p[1] + to_add) for p in upper_points]
-        print(upper_points)
+        # print(upper_points)
     if max_y // 2 < axes:
-        to_add = axes - max_y//2
+        to_add = abs(max_y - 2 * axes)
         print(to_add)
         new_points = [(p[0], p[1] + to_add) for p in new_points]
     return set(upper_points + new_points)
@@ -66,13 +71,12 @@ def fold_horizontally(points, axes, max_y):
 def fold_vertically(points, axes, max_x):
     left_points = [p for p in points if p[0] < axes]
     right_points = [p for p in points if p[0] > axes]
-    max_right = max(right_points, key=lambda p: p[0])[0]
-    new_points = [(abs(p[0] - max_right), p[1]) for p in right_points]
+    new_points = [(abs(p[0] - max_x), p[1]) for p in right_points]
     if max_x // 2 > axes:
-        to_add = max_x//2 - axes
+        to_add = abs(max_x - 2 * axes)
         left_points = [(p[0] + to_add, p[1]) for p in left_points]
     if max_x // 2 < axes:
-        to_add = axes - max_x//2 + 1
+        to_add = abs(max_x - 2 * axes)
         print(to_add)
         new_points = [(p[0] + to_add, p[1]) for p in new_points]
     return set(left_points + new_points)
@@ -115,25 +119,6 @@ class TransparentOrigamiTest(unittest.TestCase):
             .fold_horizontally(7) \
             .fold_vertically(5)
         paper.print()
-        # print(points)
-        # for instruction in instructions_iterator:
-        #     axes = int(instruction.split('=')[1])
-        #     if 'y' in instruction:
-        #         points = fold_horizontally(points, axes)
-        #     else:
-        #         points = fold_vertically(points, axes)
-        # print()
-        # print(points)
-        # max_x = max(points, key=lambda p: p[0])[0]
-        # max_y = max(points, key=lambda p: p[1])[1]
-        # for y in range(max_y + 1):
-        #     line = ''
-        #     for x in range(max_x + 1):
-        #         if (x, y) in points:
-        #             line += '#'
-        #         else:
-        #             line += '.'
-        #     print(line)
 
     def test_puzzle1(self):
         instructions = read_lines('input_13.txt')
@@ -150,6 +135,7 @@ class TransparentOrigamiTest(unittest.TestCase):
         self.assertEqual(820, len(paper.points))
         for instruction in instructions_iterator:
             axes = int(instruction.split('=')[1])
+            print(axes)
             if 'y' in instruction:
                 paper = paper.fold_horizontally(axes)
             else:
@@ -172,3 +158,9 @@ class TransparentOrigamiTest(unittest.TestCase):
         #             line += '.'
         #     print(line)
         self.assertEqual(-1, len(points))
+
+    def test_why(self):
+        points = [(0, 0), (12, 0)]
+        paper = TransparentPaper.build_from(points)
+        paper = paper.fold_vertically(2)
+        paper.print()
