@@ -14,3 +14,4 @@
 - [Syntax Scoring](./tests/test_syntax_scoring.py)
 - [Dumbo Octopus](./tests/test_dumbo_octopus.py)
 - [Passage Pathing](./tests/test_passage_pathing.py)
+- [Transparent Origami](./tests/test_transparent_origami.py)
