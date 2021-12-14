@@ -26,57 +26,27 @@ def evolve(polymer_template, rules, times):
     return polymer_template
 
 
-def evolve_adjacent(adjacent, rules, current_step, number_of_steps, memo):
-    if current_step == number_of_steps:
-        memo[(adjacent, current_step)] = Counter(adjacent[0])
-    if (adjacent, current_step) in memo.keys():
-        return memo[(adjacent, current_step)]
+def evolve_adjacent(adjacent, rules, number_of_steps, memo):
+    if number_of_steps == 0:
+        memo[(adjacent, number_of_steps)] = Counter(adjacent[0])
+    if (adjacent, number_of_steps) in memo.keys():
+        return memo[(adjacent, number_of_steps)]
 
     element_to_insert = rules[adjacent]
     left = (adjacent[0], element_to_insert)
     right = (element_to_insert, adjacent[1])
-    left_number_of_symbols = evolve_adjacent(left, rules, current_step + 1, number_of_steps, memo)
-    right_number_of_symbols = evolve_adjacent(right, rules, current_step + 1, number_of_steps, memo)
-    memo[(adjacent, current_step)] = left_number_of_symbols + right_number_of_symbols
-    return memo[(adjacent, current_step)]
+    left_number_of_symbols = evolve_adjacent(left, rules, number_of_steps - 1, memo)
+    right_number_of_symbols = evolve_adjacent(right, rules, number_of_steps - 1, memo)
+    memo[(adjacent, number_of_steps)] = left_number_of_symbols + right_number_of_symbols
+    return memo[(adjacent, number_of_steps)]
 
 
 class ExtendedPolymerizationTest(unittest.TestCase):
-    def test_evolve_adjacent(self):
-        raw_input = ['NNCB',
-                     '',
-                     'CH -> B',  # CH -> CBH
-                     'HH -> N',  # HH -> HNH
-                     'CB -> H',
-                     'NH -> C',
-                     'HB -> C',
-                     'HC -> B',
-                     'HN -> C',
-                     'NN -> C',
-                     'BH -> H',
-                     'NC -> B',
-                     'NB -> B',
-                     'BN -> B',
-                     'BB -> N',
-                     'BC -> B',
-                     'CC -> N',
-                     'CN -> C']
-
-        polymer_template, rules = parse_input(raw_input)
-        symbols = Counter(polymer_template)
-        # polymer_template = ['N', 'N']
-        memo = {}
-        for adjacent in zip(polymer_template, polymer_template[1:]):
-            symbols = symbols + evolve_adjacent(adjacent, rules, 0, 40, memo)
-        self.assertEqual(2192039569602, max(symbols.values()))
-        self.assertEqual(3849876073, min(symbols.values()))
-        self.assertEqual(2188189693529, max(symbols.values()) - min(symbols.values()))
-
     def test_evolve(self):
         raw_input = ['NNCB',
                      '',
-                     'CH -> B',  # CH -> CBH
-                     'HH -> N',  # HH -> HNH
+                     'CH -> B',
+                     'HH -> N',
                      'CB -> H',
                      'NH -> C',
                      'HB -> C',
@@ -106,9 +76,38 @@ class ExtendedPolymerizationTest(unittest.TestCase):
         symbols = Counter(polymer_template)
         memo = {}
         for adjacent in zip(polymer_template, polymer_template[1:]):
-            symbols = symbols + evolve_adjacent(adjacent, rules, 0, 10, memo)
+            symbols = symbols + evolve_adjacent(adjacent, rules, 10, memo)
         symbols += Counter([polymer_template[-1], polymer_template[-1]])
         self.assertEqual(4517, max(symbols.values()) - min(symbols.values()))
+
+    def test_evolve_adjacent(self):
+        raw_input = ['NNCB',
+                     '',
+                     'CH -> B',
+                     'HH -> N',
+                     'CB -> H',
+                     'NH -> C',
+                     'HB -> C',
+                     'HC -> B',
+                     'HN -> C',
+                     'NN -> C',
+                     'BH -> H',
+                     'NC -> B',
+                     'NB -> B',
+                     'BN -> B',
+                     'BB -> N',
+                     'BC -> B',
+                     'CC -> N',
+                     'CN -> C']
+
+        polymer_template, rules = parse_input(raw_input)
+        symbols = Counter(polymer_template)
+        memo = {}
+        for adjacent in zip(polymer_template, polymer_template[1:]):
+            symbols = symbols + evolve_adjacent(adjacent, rules, 40, memo)
+        self.assertEqual(2192039569602, max(symbols.values()))
+        self.assertEqual(3849876073, min(symbols.values()))
+        self.assertEqual(2188189693529, max(symbols.values()) - min(symbols.values()))
 
     def test_solve_puzzle_2(self):
         raw_input = read_lines('input_day14.txt')
@@ -116,6 +115,6 @@ class ExtendedPolymerizationTest(unittest.TestCase):
         symbols = Counter(polymer_template)
         memo = {}
         for adjacent in zip(polymer_template, polymer_template[1:]):
-            symbols = symbols + evolve_adjacent(adjacent, rules, 0, 40, memo)
+            symbols = symbols + evolve_adjacent(adjacent, rules, 40, memo)
         symbols += Counter([polymer_template[-1], polymer_template[-1]])
         self.assertEqual(4704817645083, max(symbols.values()) - min(symbols.values()))
