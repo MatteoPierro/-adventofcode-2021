@@ -107,6 +107,7 @@ class ExtendedPolymerizationTest(unittest.TestCase):
         memo = {}
         for adjacent in zip(polymer_template, polymer_template[1:]):
             symbols = symbols + evolve_adjacent(adjacent, rules, 0, 10, memo)
+        symbols += Counter([polymer_template[-1], polymer_template[-1]])
         self.assertEqual(4517, max(symbols.values()) - min(symbols.values()))
 
     def test_solve_puzzle_2(self):
@@ -116,4 +117,5 @@ class ExtendedPolymerizationTest(unittest.TestCase):
         memo = {}
         for adjacent in zip(polymer_template, polymer_template[1:]):
             symbols = symbols + evolve_adjacent(adjacent, rules, 0, 40, memo)
+        symbols += Counter([polymer_template[-1], polymer_template[-1]])
         self.assertEqual(4704817645083, max(symbols.values()) - min(symbols.values()))
