@@ -33,17 +33,14 @@ def evolve_adjacents(adjacent_occurrences, rules, symbols_occurrences):
         left = (adjacent[0], intermediate)
         right = (intermediate, adjacent[1])
         if left not in new_adjacents_occurrences:
-            new_adjacents_occurrences[left] = adjacent_occurrence
-        else:
-            new_adjacents_occurrences[left] += adjacent_occurrence
+            new_adjacents_occurrences[left] = 0
         if right not in new_adjacents_occurrences:
-            new_adjacents_occurrences[right] = adjacent_occurrence
-        else:
-            new_adjacents_occurrences[right] += adjacent_occurrence
+            new_adjacents_occurrences[right] = 0
         if intermediate not in symbols_occurrences.keys():
-            symbols_occurrences[intermediate] = adjacent_occurrence
-        else:
-            symbols_occurrences[intermediate] += adjacent_occurrence
+            symbols_occurrences[intermediate] = 0
+        new_adjacents_occurrences[left] += adjacent_occurrence
+        new_adjacents_occurrences[right] += adjacent_occurrence
+        symbols_occurrences[intermediate] += adjacent_occurrence
     return new_adjacents_occurrences
 
 
