@@ -14,31 +14,37 @@ def parse_input(input):
     return polymer_template, rules
 
 
-def evolve(polymer_template, rules, times):
-    for _ in range(times):
-        new_polymer_template = []
-        for adjacent in zip(polymer_template, polymer_template[1:]):
-            to_insert = rules[adjacent]
-            new_polymer_template.append(adjacent[0])
-            new_polymer_template.append(to_insert)
-        new_polymer_template.append(polymer_template[-1])
-        polymer_template = new_polymer_template
-    return polymer_template
+def evolve(raw_input, iterations):
+    polymer_template, rules = parse_input(raw_input)
+    symbols_occurrences = Counter(polymer_template)
+    adjacent_occurrences = Counter(zip(polymer_template, polymer_template[1:]))
+    for _ in range(iterations):
+        adjacent_occurrences = evolve_adjacents(adjacent_occurrences, rules, symbols_occurrences)
+    return symbols_occurrences
 
 
-def evolve_adjacent(adjacent, rules, number_of_steps, memo):
-    if number_of_steps == 0:
-        memo[(adjacent, number_of_steps)] = Counter(adjacent[0])
-    if (adjacent, number_of_steps) in memo.keys():
-        return memo[(adjacent, number_of_steps)]
-
-    element_to_insert = rules[adjacent]
-    left = (adjacent[0], element_to_insert)
-    right = (element_to_insert, adjacent[1])
-    left_number_of_symbols = evolve_adjacent(left, rules, number_of_steps - 1, memo)
-    right_number_of_symbols = evolve_adjacent(right, rules, number_of_steps - 1, memo)
-    memo[(adjacent, number_of_steps)] = left_number_of_symbols + right_number_of_symbols
-    return memo[(adjacent, number_of_steps)]
+def evolve_adjacents(adjacent_occurrences, rules, symbols_occurrences):
+    new_adjacents_occurrences = {}
+    for (adjacent, intermediate) in rules.items():
+        # rule adjacent not present in the current template
+        if adjacent not in adjacent_occurrences.keys():
+            continue
+        adjacent_occurrence = adjacent_occurrences[adjacent]
+        left = (adjacent[0], intermediate)
+        right = (intermediate, adjacent[1])
+        if left not in new_adjacents_occurrences:
+            new_adjacents_occurrences[left] = adjacent_occurrence
+        else:
+            new_adjacents_occurrences[left] += adjacent_occurrence
+        if right not in new_adjacents_occurrences:
+            new_adjacents_occurrences[right] = adjacent_occurrence
+        else:
+            new_adjacents_occurrences[right] += adjacent_occurrence
+        if intermediate not in symbols_occurrences.keys():
+            symbols_occurrences[intermediate] = adjacent_occurrence
+        else:
+            symbols_occurrences[intermediate] += adjacent_occurrence
+    return new_adjacents_occurrences
 
 
 class ExtendedPolymerizationTest(unittest.TestCase):
@@ -61,60 +67,19 @@ class ExtendedPolymerizationTest(unittest.TestCase):
                      'BC -> B',
                      'CC -> N',
                      'CN -> C']
-        polymer_template, rules = parse_input(raw_input)
-        polymer_template = evolve(polymer_template, rules, 4)
-        self.assertEqual('NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB', ''.join(polymer_template))
-
-        polymer_template, rules = parse_input(raw_input)
-        polymer_template = evolve(polymer_template, rules, 10)
-        values = sorted(Counter(polymer_template).values())
-        self.assertEqual(1588, values[-1] - values[0])
+        symbols_occurrences = evolve(raw_input, 10)
+        self.assertEqual(1588, max(symbols_occurrences.values()) - min(symbols_occurrences.values()))
+        symbols_occurrences = evolve(raw_input, 40)
+        self.assertEqual(2192039569602, max(symbols_occurrences.values()))
+        self.assertEqual(3849876073, min(symbols_occurrences.values()))
+        self.assertEqual(2188189693529, max(symbols_occurrences.values()) - min(symbols_occurrences.values()))
 
     def test_solve_puzzle_1(self):
         raw_input = read_lines('input_day14.txt')
-        polymer_template, rules = parse_input(raw_input)
-        symbols = Counter(polymer_template)
-        memo = {}
-        for adjacent in zip(polymer_template, polymer_template[1:]):
-            symbols = symbols + evolve_adjacent(adjacent, rules, 10, memo)
-        symbols += Counter([polymer_template[-1], polymer_template[-1]])
-        self.assertEqual(4517, max(symbols.values()) - min(symbols.values()))
-
-    def test_evolve_adjacent(self):
-        raw_input = ['NNCB',
-                     '',
-                     'CH -> B',
-                     'HH -> N',
-                     'CB -> H',
-                     'NH -> C',
-                     'HB -> C',
-                     'HC -> B',
-                     'HN -> C',
-                     'NN -> C',
-                     'BH -> H',
-                     'NC -> B',
-                     'NB -> B',
-                     'BN -> B',
-                     'BB -> N',
-                     'BC -> B',
-                     'CC -> N',
-                     'CN -> C']
-
-        polymer_template, rules = parse_input(raw_input)
-        symbols = Counter(polymer_template)
-        memo = {}
-        for adjacent in zip(polymer_template, polymer_template[1:]):
-            symbols = symbols + evolve_adjacent(adjacent, rules, 40, memo)
-        self.assertEqual(2192039569602, max(symbols.values()))
-        self.assertEqual(3849876073, min(symbols.values()))
-        self.assertEqual(2188189693529, max(symbols.values()) - min(symbols.values()))
+        symbols_occurrences = evolve(raw_input, 10)
+        self.assertEqual(4517, max(symbols_occurrences.values()) - min(symbols_occurrences.values()))
 
     def test_solve_puzzle_2(self):
         raw_input = read_lines('input_day14.txt')
-        polymer_template, rules = parse_input(raw_input)
-        symbols = Counter(polymer_template)
-        memo = {}
-        for adjacent in zip(polymer_template, polymer_template[1:]):
-            symbols = symbols + evolve_adjacent(adjacent, rules, 40, memo)
-        symbols += Counter([polymer_template[-1], polymer_template[-1]])
-        self.assertEqual(4704817645083, max(symbols.values()) - min(symbols.values()))
+        symbols_occurrences = evolve(raw_input, 40)
+        self.assertEqual(4704817645083, max(symbols_occurrences.values()) - min(symbols_occurrences.values()))
