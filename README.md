@@ -16,3 +16,4 @@
 - [Passage Pathing](./tests/test_passage_pathing.py)
 - [Transparent Origami](./tests/test_transparent_origami.py)
 - [Extended Polymerization](./tests/test_extended_polymerization.py)
+- [Chiton](./tests/test_chiton.py)
