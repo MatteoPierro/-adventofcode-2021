@@ -5,6 +5,7 @@ from advent_of_code.utilities import read_lines
 
 from collections import defaultdict
 from itertools import product
+import numpy as np
 
 
 # https://stackabuse.com/dijkstras-algorithm-in-python/
@@ -42,8 +43,7 @@ class UnidirectionalGraph:
         return distances
 
 
-def find_shortest_path_cost(raw_risk_map):
-    risk_map = [parse_row(row) for row in raw_risk_map]
+def find_shortest_path_cost(risk_map):
     height = len(risk_map)
     width = len(risk_map[0])
     g = UnidirectionalGraph()
@@ -57,6 +57,17 @@ def find_shortest_path_cost(raw_risk_map):
 
 def parse_row(row):
     return [int(v) for v in row]
+
+
+def create_bigger_risk_level_map(risk_level_map):
+    lx = len(risk_level_map[0])
+    ly = len(risk_level_map)
+    small_matrix = np.array(risk_level_map)
+    to_add = np.array([list(range(5)), list(range(1, 6)),
+                       list(range(2, 7)), list(range(3, 8)), list(range(4, 9))])
+    total_matrix = np.kron(np.ones((5, 5)), small_matrix) + np.kron(to_add, np.ones((lx, ly)))
+    total_matrix[total_matrix > 9] -= 9
+    return total_matrix
 
 
 class ChitonTest(unittest.TestCase):
@@ -73,8 +84,12 @@ class ChitonTest(unittest.TestCase):
             '1293138521',
             '2311944581'
         ]
-        self.assertEqual(40, find_shortest_path_cost(raw_risk_map))
+        risk_map = [parse_row(row) for row in raw_risk_map]
+        self.assertEqual(40, find_shortest_path_cost(risk_map))
+        self.assertEqual(315, find_shortest_path_cost(create_bigger_risk_level_map(risk_map)))
 
-    def test_puzzle1(self):
+    def test_puzzles(self):
         raw_risk_map = read_lines('input_day15.txt')
-        self.assertEqual(363, find_shortest_path_cost(raw_risk_map))
+        risk_map = [parse_row(row) for row in raw_risk_map]
+        self.assertEqual(363, find_shortest_path_cost(risk_map))
+        self.assertEqual(2835, find_shortest_path_cost(create_bigger_risk_level_map(risk_map)))
