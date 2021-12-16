@@ -14,7 +14,7 @@ class UnidirectionalGraph:
     def add_edge(self, v1, v2, weight):
         self.edges[v1][v2] = weight
 
-    def dijkstra(self, start_vertex):
+    def dijkstra(self, start_vertex, end=None):
         distances = {v: float('inf') for v in self.edges.keys()}
         distances[start_vertex] = 0
 
@@ -36,8 +36,8 @@ class UnidirectionalGraph:
                     distances[neighbor] = new_cost
 
             visited.append(current_vertex)
-            # if current_vertex == (9, 9):
-            #     return D
+            if current_vertex == end:
+                return distances[current_vertex]
         return distances
 
 
@@ -52,9 +52,7 @@ def find_shortest_path_cost(raw_risk_map):
                 n = (x + dx, y + dy)
                 if 0 <= n[0] < width and 0 <= n[1] < height:
                     g.add_edge((x, y), n, risk_map[n[1]][n[0]])
-    distances = g.dijkstra((0, 0))
-    distance_shortest_path = distances[(width - 1), (height - 1)]
-    return distance_shortest_path
+    return g.dijkstra((0, 0), end=(width - 1, height - 1))
 
 
 def parse_row(row):
