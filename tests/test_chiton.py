@@ -4,6 +4,7 @@ from queue import PriorityQueue
 from advent_of_code.utilities import read_lines
 
 from collections import defaultdict
+from itertools import product
 
 
 # https://stackabuse.com/dijkstras-algorithm-in-python/
@@ -18,24 +19,24 @@ class UnidirectionalGraph:
         distances = {v: float('inf') for v in self.edges.keys()}
         distances[start_vertex] = 0
 
-        pq = PriorityQueue()
-        pq.put((0, start_vertex))
-        visited = []
+        queue = PriorityQueue()
+        queue.put((0, start_vertex))
+        visited = set()
 
-        while not pq.empty():
-            (dist, current_vertex) = pq.get()
+        while not queue.empty():
+            (distance_to_current_vertex, current_vertex) = queue.get()
 
             for neighbor in self.edges[current_vertex].keys():
                 if neighbor in visited:
                     continue
                 distance = self.edges[current_vertex][neighbor]
                 old_cost = distances[neighbor]
-                new_cost = distances[current_vertex] + distance
+                new_cost = distance_to_current_vertex + distance
                 if new_cost < old_cost:
-                    pq.put((new_cost, neighbor))
+                    queue.put((new_cost, neighbor))
                     distances[neighbor] = new_cost
 
-            visited.append(current_vertex)
+            visited.add(current_vertex)
             if current_vertex == end:
                 return distances[current_vertex]
         return distances
@@ -46,12 +47,11 @@ def find_shortest_path_cost(raw_risk_map):
     height = len(risk_map)
     width = len(risk_map[0])
     g = UnidirectionalGraph()
-    for y in range(height):
-        for x in range(width):
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                n = (x + dx, y + dy)
-                if 0 <= n[0] < width and 0 <= n[1] < height:
-                    g.add_edge((x, y), n, risk_map[n[1]][n[0]])
+    for x, y in product(range(width), range(height)):
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            n = (x + dx, y + dy)
+            if 0 <= n[0] < width and 0 <= n[1] < height:
+                g.add_edge((x, y), n, risk_map[n[1]][n[0]])
     return g.dijkstra((0, 0), end=(width - 1, height - 1))
 
 
