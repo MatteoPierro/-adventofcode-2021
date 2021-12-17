@@ -67,6 +67,9 @@ def parse_packet(packet):
     if expression_type == 1:
         operands, packet = read_operands(packet)
         return Product(operands), packet
+    if expression_type == 2:
+        operands, packet = read_operands(packet)
+        return Minimum(operands), packet
 
 
 def read_operands(packet):
@@ -115,6 +118,11 @@ class PacketDecoderTest(unittest.TestCase):
         (operation, _) = parse_packet(packet)
         self.assertEqual(54, operation.calculate())
 
+    def test_minimum_packet(self):
+        packet = convert_hex_string('880086C3E88112')
+        (operation, _) = parse_packet(packet)
+        self.assertEqual(7, operation.calculate())
+
 
 class Number:
     def __init__(self, value):
@@ -150,3 +158,11 @@ class Product:
         for op in self.operands:
             value *= op.calculate()
         return value
+
+
+class Minimum:
+    def __init__(self, operands):
+        self.operands = operands
+
+    def calculate(self):
+        return min([o.calculate() for o in self.operands])
