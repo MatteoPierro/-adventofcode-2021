@@ -101,6 +101,8 @@ def read_operands(packet):
     packet = packet[11:]
     operands = []
     for _ in range(number_of_packets):
+        if len(packet) == 0:
+            break
         (n, packet) = parse_packet(packet)
         operands.append(n)
     return operands, packet
@@ -154,6 +156,17 @@ class PacketDecoderTest(unittest.TestCase):
         packet = convert_hex_string('9C005AC2F8F0')
         (operation, _) = parse_packet(packet)
         self.assertEqual(0, operation.calculate())
+
+    def test_complex_scenario(self):
+        packet = convert_hex_string('9C0141080250320F1802104A08')
+        (operation, _) = parse_packet(packet)
+        self.assertEqual(1, operation.calculate())
+
+    def test_puzzle2(self):
+        raw_packets = read_lines('input_day16.txt')[0]
+        packet = convert_hex_string(raw_packets)
+        (operation, _) = parse_packet(packet)
+        self.assertEqual(222324192331240, operation.calculate()) # this is the wrong answer
 
 
 class Number:
