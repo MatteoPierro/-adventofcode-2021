@@ -73,6 +73,9 @@ def parse_packet(packet):
     if expression_type == 3:
         operands, packet = read_operands(packet)
         return Maximum(operands), packet
+    if expression_type == 6:
+        operands, packet = read_operands(packet)
+        return Less(operands), packet
 
 
 def read_operands(packet):
@@ -131,6 +134,12 @@ class PacketDecoderTest(unittest.TestCase):
         (operation, _) = parse_packet(packet)
         self.assertEqual(9, operation.calculate())
 
+    def test_less_packet(self):
+        packet = convert_hex_string('D8005AC2A8F0')
+        print(packet)
+        (operation, _) = parse_packet(packet)
+        self.assertEqual(1, operation.calculate())
+
 
 class Number:
     def __init__(self, value):
@@ -182,3 +191,15 @@ class Maximum:
 
     def calculate(self):
         return max([o.calculate() for o in self.operands])
+
+
+class Less:
+    def __init__(self, operands):
+        if len(operands) != 2:
+            raise 'Max two operands!'
+        self.operands = operands
+
+    def calculate(self):
+        if self.operands[0].calculate() < self.operands[1].calculate():
+            return 1
+        return 0
