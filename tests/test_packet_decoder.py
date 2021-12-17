@@ -62,17 +62,28 @@ def parse_packet(packet):
         number, packet = read_number(packet)
         return Number(number), packet
     if expression_type == 0:
-        number_of_packets, packet = read_number_of_packets(packet)
-        operands, packet = read_operands(number_of_packets, packet)
+        operands, packet = read_operands(packet)
         return Sum(operands), packet
     if expression_type == 1:
-        number_of_packets, packet = read_number_of_packets(packet)
-        print(number_of_packets)
-        operands, packet = read_operands(number_of_packets, packet)
+        operands, packet = read_operands(packet)
         return Product(operands), packet
 
 
-def read_operands(number_of_packets, packet):
+def read_operands(packet):
+    length_type = packet[0]
+    packet = packet[1:]
+    if length_type == '0':
+        sub_packet_length = int(packet[: 15], 2)
+        packet = packet[15:]
+        packet = packet[:sub_packet_length]
+        operands = []
+        while len(packet) != 0:
+            (n, packet) = parse_packet(packet)
+            operands.append(n)
+        return operands, packet
+
+    number_of_packets = int(packet[: 11], 2)
+    packet = packet[11:]
     operands = []
     for _ in range(number_of_packets):
         (n, packet) = parse_packet(packet)
@@ -89,19 +100,6 @@ def read_number(packet):
     return int(number), packet[5:]
 
 
-def read_number_of_packets(packet):
-    length_type = packet[0]
-    packet = packet[1:]
-    if length_type == '0':
-        print(packet[: 15])
-        number_of_packets = int(packet[: 15], 2)
-        packet = packet[15:]
-    else:
-        number_of_packets = int(packet[: 11], 2)
-        packet = packet[11:]
-    return number_of_packets, packet
-
-
 class PacketDecoderTest(unittest.TestCase):
     def test_puzzle1(self):
         raw_packets = read_lines('input_day16.txt')[0]
@@ -114,9 +112,8 @@ class PacketDecoderTest(unittest.TestCase):
 
     def test_product_packet(self):
         packet = convert_hex_string('04005AC33890')
-        print(packet)
         (operation, _) = parse_packet(packet)
-        self.assertEqual(3, operation.calculate())
+        self.assertEqual(54, operation.calculate())
 
 
 class Number:
@@ -127,6 +124,9 @@ class Number:
         return self.value
 
     def __str__(self):
+        return f"{self.calculate()}"
+
+    def __repr__(self):
         return f"{self.calculate()}"
 
 
@@ -140,12 +140,13 @@ class Sum:
             value += op.calculate()
         return value
 
+
 class Product:
     def __init__(self, operands):
         self.operands = operands
 
     def calculate(self):
-        value = 0
+        value = 1
         for op in self.operands:
             value *= op.calculate()
         return value
