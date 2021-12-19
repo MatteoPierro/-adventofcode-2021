@@ -18,6 +18,23 @@ class Pair:
     def __add__(self, other):
         return Pair(self, other)
 
+    def magnitude(self):
+        return 3 * self.left.magnitude() + 2 * self.right.magnitude()
+
+
+class Value:
+    def __init__(self, value):
+        self.value = value
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __repr__(self):
+        return f"{self.value}"
+
+    def magnitude(self):
+        return self.value
+
 
 def split_number(number):
     if type(number.left) == Value and number.left.value >= 10:
@@ -93,17 +110,12 @@ def handle_left(pair, path, root):
         value_to_add = value_to_add.right
     value_to_add.value += pair.left.value
 
-
-class Value:
-    def __init__(self, value):
-        self.value = value
-
-    def __eq__(self, other):
-        return self.value == other.value
-
-    def __repr__(self):
-        return f"{self.value}"
-
+def last_turn(path, position):
+    try:
+        index = len(path) - 1 - path[::-1].index(position)
+        return path[:index + 1]
+    except:
+        return None
 
 def reduce_number(root):
     while True:
@@ -199,17 +211,10 @@ class Snailfish(unittest.TestCase):
                        '[[[[4, 2], 2], 6], [8, 7]]']
         number = add_raw_numbers(raw_numbers)
         self.assertEqual('[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]', str(number))
+        self.assertEqual(3488, number.magnitude())
 
     def assertExplosion(self, exploded, original):
         root = parse_raw_pair(original)
         path, pair = next_explosion(root, [])
         explode(pair, path, root)
         self.assertEqual(exploded, str(root))
-
-
-def last_turn(path, position):
-    try:
-        index = len(path) - 1 - path[::-1].index(position)
-        return path[:index + 1]
-    except:
-        return None
