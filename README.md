@@ -19,3 +19,4 @@
 - [Chiton](./tests/test_chiton.py)
 - [Packet Decoder](./tests/test_packet_decoder.py)
 - [Trick Shot](./tests/test_trick_shot.py)
+- [Snailfish](./tests/test_snailfish.py)

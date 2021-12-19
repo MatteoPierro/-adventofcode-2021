@@ -110,12 +110,14 @@ def handle_left(pair, path, root):
         value_to_add = value_to_add.right
     value_to_add.value += pair.left.value
 
+
 def last_turn(path, position):
     try:
         index = len(path) - 1 - path[::-1].index(position)
         return path[:index + 1]
     except:
         return None
+
 
 def reduce_number(root):
     while True:
@@ -151,6 +153,25 @@ def add_raw_numbers(raw_numbers):
         number = number + addend
         reduce_number(number)
     return number
+
+
+def find_largest_magnitude(raw_numbers):
+    highest_max_magnitude = float('-inf')
+    for raw_number in raw_numbers:
+        remaining_raw_numbers = list(raw_numbers)
+        remaining_raw_numbers.remove(raw_number)
+        max_magnitude = float('-inf')
+        for other_raw_number in remaining_raw_numbers:
+            number = parse_raw_pair(raw_number)
+            reduce_number(number)
+            summed_numbers = number + parse_raw_pair(other_raw_number)
+            reduce_number(summed_numbers)
+            magnitude = summed_numbers.magnitude()
+            if magnitude > max_magnitude:
+                max_magnitude = magnitude
+        if max_magnitude > highest_max_magnitude:
+            highest_max_magnitude = max_magnitude
+    return highest_max_magnitude
 
 
 class Snailfish(unittest.TestCase):
@@ -213,10 +234,24 @@ class Snailfish(unittest.TestCase):
         self.assertEqual('[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]', str(number))
         self.assertEqual(3488, number.magnitude())
 
-    def test_puzzle_1(self):
+    def test_highest_magnitude(self):
+        raw_numbers = ['[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]',
+                       '[[[5,[2,8]],4],[5,[[9,9],0]]]',
+                       '[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]',
+                       '[[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]',
+                       '[[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]',
+                       '[[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]',
+                       '[[[[5,4],[7,7]],8],[[8,3],8]]',
+                       '[[9,3],[[9,9],[6,[4,9]]]]',
+                       '[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]',
+                       '[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]']
+        self.assertEqual(3993, find_largest_magnitude(raw_numbers))
+
+    def test_puzzles(self):
         raw_numbers = read_lines('input_day18.txt')
         number = add_raw_numbers(raw_numbers)
         self.assertEqual(2541, number.magnitude())
+        self.assertEqual(4647, find_largest_magnitude(raw_numbers))
 
     def assertExplosion(self, exploded, original):
         root = parse_raw_pair(original)
