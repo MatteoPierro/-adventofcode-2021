@@ -17,24 +17,23 @@ class Pair:
         return Pair(self, other)
 
 
-def all_explosion(pair, current_path):
+def next_explosion(pair, current_path):
     if type(pair) == Value:
         return None
     if len(current_path) == 4:
         return current_path, pair
-    candidate = all_explosion(pair.left, current_path + ['left'])
+    candidate = next_explosion(pair.left, current_path + ['left'])
     if candidate is not None:
         return candidate
-    return all_explosion(pair.right, current_path + ['right'])
+    return next_explosion(pair.right, current_path + ['right'])
 
 
 def explode(pair, path, root):
     handle_left(pair, path, root)
     handle_right(pair, path, root)
     ## change value
-    last = path[:-1]
     value_to_add = root
-    for t in last:
+    for t in path[:-1]:
         if t == 'left':
             value_to_add = value_to_add.left
         else:
@@ -88,6 +87,15 @@ class Value:
         return f"{self.value}"
 
 
+def reduce_number(root):
+    while True:
+        explosion = next_explosion(root, [])
+        if explosion is None:
+            break
+        path, pair = explosion
+        explode(pair, path, root)
+
+
 def parse_raw_pair(raw_expression):
     return parse_pair(eval(raw_expression))
 
@@ -115,29 +123,34 @@ class Snailfish(unittest.TestCase):
         self.assertEqual(expected, str(left + right))
 
     def test_explode(self):
-        self.assertExploded('[[[[0,9],2],3],4]', '[[[[[9,8],1],2],3],4]')
-        self.assertExploded('[7,[6,[5,[7,0]]]]', '[7,[6,[5,[4,[3,2]]]]]')
-        self.assertExploded('[[6,[5,[7,0]]],3]', '[[6,[5,[4,[3,2]]]],1]')
-        self.assertExploded('[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]', '[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]')
-        self.assertExploded('[[3,[2,[8,0]]],[9,[5,[7,0]]]]', '[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]')
+        self.assertExplosion('[[[[0,9],2],3],4]', '[[[[[9,8],1],2],3],4]')
+        self.assertExplosion('[7,[6,[5,[7,0]]]]', '[7,[6,[5,[4,[3,2]]]]]')
+        self.assertExplosion('[[6,[5,[7,0]]],3]', '[[6,[5,[4,[3,2]]]],1]')
+        self.assertExplosion('[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]', '[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]')
+        self.assertExplosion('[[3,[2,[8,0]]],[9,[5,[7,0]]]]', '[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]')
 
     def test_find_candidate_explosion(self):
         root = parse_raw_pair('[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]')
-        path, pair = all_explosion(root, [])
+        path, pair = next_explosion(root, [])
         self.assertEqual(['left', 'left', 'left', 'left'], path)
         self.assertEqual('[4,3]', str(pair))
         explode(pair, path, root)
         self.assertEqual('[[[[0,7],4],[7,[[8,4],9]]],[1,1]]', str(root))
 
-        path, pair = all_explosion(root, [])
+        path, pair = next_explosion(root, [])
         self.assertEqual(['left', 'right', 'right', 'left'], path)
         self.assertEqual('[8,4]', str(pair))
         explode(pair, path, root)
         self.assertEqual('[[[[0,7],4],[15,[0,13]]],[1,1]]', str(root))
 
-    def assertExploded(self, exploded, original):
+    def test_reduce_number(self):
+        root = parse_raw_pair('[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]')
+        reduce_number(root)
+        self.assertEqual('[[[[0,7],4],[15,[0,13]]],[1,1]]', str(root))
+
+    def assertExplosion(self, exploded, original):
         root = parse_raw_pair(original)
-        path, pair = all_explosion(root, [])
+        path, pair = next_explosion(root, [])
         explode(pair, path, root)
         self.assertEqual(exploded, str(root))
 
