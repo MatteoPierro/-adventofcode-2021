@@ -1,4 +1,6 @@
 import unittest
+from math import floor, ceil
+
 from advent_of_code.utilities import read_lines
 
 
@@ -15,6 +17,22 @@ class Pair:
 
     def __add__(self, other):
         return Pair(self, other)
+
+
+def split_number(number):
+    if type(number.left) == Value and number.left.value >= 10:
+        regular_number = number.left.value
+        number.left = Pair(Value(floor(regular_number / 2)), Value(ceil(regular_number / 2)))
+        return True
+    if type(number.left) == Pair and split_number(number.left):
+        return True
+    if type(number.right) == Value and number.right.value >= 10:
+        regular_number = number.right.value
+        number.right = Pair(Value(floor(regular_number / 2)), Value(ceil(regular_number / 2)))
+        return True
+    if type(number.right) == Pair and split_number(number.right):
+        return True
+    return False
 
 
 def next_explosion(pair, current_path):
@@ -89,11 +107,14 @@ class Value:
 
 def reduce_number(root):
     while True:
-        explosion = next_explosion(root, [])
-        if explosion is None:
-            break
-        path, pair = explosion
-        explode(pair, path, root)
+        while True:
+            explosion = next_explosion(root, [])
+            if explosion is None:
+                break
+            path, pair = explosion
+            explode(pair, path, root)
+        if not split_number(root):
+            return
 
 
 def parse_raw_pair(raw_expression):
@@ -108,6 +129,16 @@ def parse_pair(expression):
         parse_pair(left),
         parse_pair(right)
     )
+
+
+def add_raw_numbers(raw_numbers):
+    number = parse_raw_pair(raw_numbers[0])
+    reduce_number(number)
+    for raw_number in raw_numbers[1:]:
+        addend = parse_raw_pair(raw_number)
+        number = number + addend
+        reduce_number(number)
+    return number
 
 
 class Snailfish(unittest.TestCase):
@@ -146,7 +177,28 @@ class Snailfish(unittest.TestCase):
     def test_reduce_number(self):
         root = parse_raw_pair('[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]')
         reduce_number(root)
-        self.assertEqual('[[[[0,7],4],[15,[0,13]]],[1,1]]', str(root))
+        self.assertEqual('[[[[0,7],4],[[7,8],[6,0]]],[8,1]]', str(root))
+
+    def test_sum_number(self):
+        raw_numbers = ['[1, 1]',
+                       '[2, 2]',
+                       '[3, 3]',
+                       '[4, 4]']
+        number = add_raw_numbers(raw_numbers)
+        self.assertEqual('[[[[1,1],[2,2]],[3,3]],[4,4]]', str(number))
+
+        raw_numbers = ['[[[0, [4, 5]], [0, 0]], [[[4, 5], [2, 6]], [9, 5]]]',
+                       '[7, [[[3, 7], [4, 3]], [[6, 3], [8, 8]]]]',
+                       '[[2, [[0, 8], [3, 4]]], [[[6, 7], 1], [7, [1, 6]]]]',
+                       '[[[[2, 4], 7], [6, [0, 5]]], [[[6, 8], [2, 8]], [[2, 1], [4, 5]]]]',
+                       '[7, [5, [[3, 8], [1, 4]]]]',
+                       '[[2, [2, 2]], [8, [8, 1]]]',
+                       '[2, 9]',
+                       '[1, [[[9, 3], 9], [[9, 0], [0, 7]]]]',
+                       '[[[5, [7, 4]], 7], 1]',
+                       '[[[[4, 2], 2], 6], [8, 7]]']
+        number = add_raw_numbers(raw_numbers)
+        self.assertEqual('[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]', str(number))
 
     def assertExplosion(self, exploded, original):
         root = parse_raw_pair(original)
@@ -154,15 +206,10 @@ class Snailfish(unittest.TestCase):
         explode(pair, path, root)
         self.assertEqual(exploded, str(root))
 
-# right left -> add to last element of left, right
-# left left ->
-
-# find last right and instead of going ok the right go to the last value on left -> right
 
 def last_turn(path, position):
     try:
         index = len(path) - 1 - path[::-1].index(position)
-        print(index)
         return path[:index + 1]
     except:
         return None
