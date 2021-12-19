@@ -191,7 +191,7 @@ class Snailfish(unittest.TestCase):
         reduce_number(root)
         self.assertEqual('[[[[0,7],4],[[7,8],[6,0]]],[8,1]]', str(root))
 
-    def test_sum_number(self):
+    def test_sum_numbers(self):
         raw_numbers = ['[1, 1]',
                        '[2, 2]',
                        '[3, 3]',
@@ -212,6 +212,11 @@ class Snailfish(unittest.TestCase):
         number = add_raw_numbers(raw_numbers)
         self.assertEqual('[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]', str(number))
         self.assertEqual(3488, number.magnitude())
+
+    def test_puzzle_1(self):
+        raw_numbers = read_lines('input_day18.txt')
+        number = add_raw_numbers(raw_numbers)
+        self.assertEqual(2541, number.magnitude())
 
     def assertExplosion(self, exploded, original):
         root = parse_raw_pair(original)
