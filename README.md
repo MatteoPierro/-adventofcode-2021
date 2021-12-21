@@ -22,3 +22,4 @@
 - [Snailfish](./tests/test_snailfish.py)
 - [Beacon Scanner](./tests/test_beacon_scanner.py)
 - [Trench Map](./tests/test_trench_map.py)
+- [Dirac Dice](./tests/test_dirac_dice.py)
