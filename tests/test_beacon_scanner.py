@@ -107,6 +107,17 @@ def find_unique_beacons(scanners):
     return unique_beacons
 
 
+def calculate_max_distance(scanners):
+    max_distance = 0
+    for s1 in scanners:
+        for s2 in scanners:
+            x, y, z = difference(s1.absolute_position, s2.absolute_position)
+            distance = abs(x) + abs(y) + abs(z)
+            if distance > max_distance:
+                max_distance = distance
+    return max_distance
+
+
 class BeaconScannerTest(unittest.TestCase):
     def test_small_input(self):
         raw_scanners = read_blocks('input_day19_test.txt')
@@ -117,9 +128,11 @@ class BeaconScannerTest(unittest.TestCase):
         self.assertEqual([-92, -2380, -20], scanners[3].absolute_position)
         self.assertEqual([1105, -1205, 1229], scanners[2].absolute_position)
         self.assertEqual(79, find_unique_beacons(scanners))
+        self.assertEqual(3621, calculate_max_distance(scanners))
 
-    def test_puzzle1(self):
+    def test_puzzles(self):
         raw_scanners = read_blocks('input_day19.txt')
         scanners = parse_input(raw_scanners)
         find_scanners_positions(scanners)
         self.assertEqual(376, find_unique_beacons(scanners))
+        self.assertEqual(10772, calculate_max_distance(scanners))
