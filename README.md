@@ -20,5 +20,5 @@
 - [Packet Decoder](./tests/test_packet_decoder.py)
 - [Trick Shot](./tests/test_trick_shot.py)
 - [Snailfish](./tests/test_snailfish.py)
-- [Beacon Scanner (WIP)]()
+- [Beacon Scanner](./tests/test_beacon_scanner.py)
 - [Trench Map](./tests/test_trench_map.py)
