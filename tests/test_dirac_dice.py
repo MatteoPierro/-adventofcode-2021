@@ -6,6 +6,8 @@ class Player:
         self.position = position
         self.score = 0
 
+# from itertools import combinations_with_replacement
+# list(combinations_with_replacement([1,2,3], 3))
 
 def evolve(players):
     dice_face = 1
