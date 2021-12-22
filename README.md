@@ -23,3 +23,4 @@
 - [Beacon Scanner](./tests/test_beacon_scanner.py)
 - [Trench Map](./tests/test_trench_map.py)
 - [Dirac Dice](./tests/test_dirac_dice.py)
+- [Reactor Reboot](./tests/test_reactor_robot.py)
