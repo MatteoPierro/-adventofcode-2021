@@ -61,3 +61,88 @@ class ReactorRebootTest(unittest.TestCase):
             reboot_switch, limits = parse_input(reboot_step)
             already_on = operate_reboot(reboot_switch, limits, already_on)
         self.assertEqual(564654, len(already_on))
+
+    def test_overlap_area(self):
+        v1 = Volume((1, 5), (0, 10), (-10, 7))  # x_range, y_range, z_range
+        v2 = Volume((2, 6), (10, 20), (5, 20))
+        self.assertTrue(v1.overlaps(v2))
+        self.assertTrue(v2.overlaps(v1))
+        v1 = Volume((1, 5), (0, 0), (0, 0))
+        v2 = Volume((7, 10), (0, 0), (0, 0))
+        self.assertFalse(v1.overlaps(v2))
+        self.assertFalse(v2.overlaps(v1))
+        v1 = Volume((1, 5), (0, 10), (0, 0))
+        v2 = Volume((2, 6), (20, 30), (0, 0))
+        self.assertFalse(v1.overlaps(v2))
+        self.assertFalse(v2.overlaps(v1))
+        v1 = Volume((1, 5), (0, 10), (0, 10))
+        v2 = Volume((2, 6), (0, 10), (20, 30))
+        self.assertFalse(v1.overlaps(v2))
+        self.assertFalse(v2.overlaps(v1))
+        v1 = Volume((-1, 5), (0, 10), (0, 0))
+        v2 = Volume((2, 6), (0, 10), (0, 0))
+        v1.subtract(v2)
+        self.assertEqual(33, v1.volume())
+
+    def test_calculate_volumes(self):
+        reboot_steps = read_lines('input_day22_test.txt')
+        areas_on = []
+        for reboot_step in reboot_steps:
+            reboot_switch, limits = parse_input(reboot_step)
+            v = Volume(limits[0], limits[1], limits[2])
+            for vv in areas_on:
+                vv.subtract(v)
+            if reboot_switch == 'on':
+                areas_on.append(v)
+        self.assertEqual(2758514936282235, sum([v.volume() for v in areas_on]))
+
+    def test_puzzle2(self):
+        reboot_steps = read_lines('input_day22.txt')
+        areas_on = []
+        for reboot_step in reboot_steps:
+            reboot_switch, limits = parse_input(reboot_step)
+            v = Volume(limits[0], limits[1], limits[2])
+            for vv in areas_on:
+                vv.subtract(v)
+            if reboot_switch == 'on':
+                areas_on.append(v)
+        self.assertEqual(1214193181891104, sum([v.volume() for v in areas_on]))
+
+
+class Volume:
+    def __init__(self, x_range, y_range, z_range):
+        self.x_range = x_range
+        self.y_range = y_range
+        self.z_range = z_range
+        self.to_remove = []
+
+    def overlaps(self, other):
+        if not (self.x_range[0] <= other.x_range[1] <= self.x_range[1] or
+                other.x_range[0] <= self.x_range[1] <= other.x_range[1]):
+            return False
+        if not (self.y_range[0] <= other.y_range[1] <= self.y_range[1] or
+                other.y_range[0] <= self.y_range[1] <= other.y_range[1]):
+            return False
+        if not (self.z_range[0] <= other.z_range[1] <= self.z_range[1] or
+                other.z_range[0] <= self.z_range[1] <= other.z_range[1]):
+            return False
+        return True
+
+    def subtract(self, other):
+        if not self.overlaps(other):
+            return
+        x_min = max(self.x_range[0], other.x_range[0])
+        x_max = min(self.x_range[1], other.x_range[1])
+        y_min = max(self.y_range[0], other.y_range[0])
+        y_max = min(self.y_range[1], other.y_range[1])
+        z_min = max(self.z_range[0], other.z_range[0])
+        z_max = min(self.z_range[1], other.z_range[1])
+        overlap_volume = Volume((x_min, x_max), (y_min, y_max), (z_min, z_max))
+        for v in self.to_remove:
+            v.subtract(overlap_volume)
+        self.to_remove.append(overlap_volume)
+
+    def volume(self):
+        volume_to_remove = sum([v.volume() for v in self.to_remove])
+        return ((abs(self.x_range[1] - self.x_range[0]) + 1) * (abs(self.y_range[1] - self.y_range[0]) + 1) * (abs(
+            self.z_range[1] - self.z_range[0]) + 1)) - volume_to_remove
