@@ -24,3 +24,4 @@
 - [Trench Map](./tests/test_trench_map.py)
 - [Dirac Dice](./tests/test_dirac_dice.py)
 - [Reactor Reboot](./tests/test_reactor_robot.py)
+- [Amphipod](./tests/test_amphipod.py) (second part doesn't work for all the inputs and I solved mine by hand)
