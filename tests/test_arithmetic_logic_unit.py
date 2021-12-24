@@ -52,7 +52,61 @@ class Alu:
                 self.memory[first] = 1 if self.memory[first] == int(second) else 0
 
 
-class ArithmeticLogicUnit(unittest.TestCase):
+def find_max(alu_input):
+    digits, solver = build_solver(alu_input)
+    solver.push()
+    solver.maximize(sum((10 ** i) * d for i, d in enumerate(digits[::-1])))
+    if not solver.check() == z3.sat:
+        raise 'Impossible to find a solution!'
+    model = solver.model()
+    return int(''.join([str(model[d]) for d in digits]))
+
+
+def find_min(alu_input):
+    digits, solver = build_solver(alu_input)
+    solver.push()
+    solver.minimize(sum((10 ** i) * d for i, d in enumerate(digits[::-1])))
+    if not solver.check() == z3.sat:
+        raise 'Impossible to find a solution!'
+    model = solver.model()
+    return int(''.join([str(model[d]) for d in digits]))
+
+
+def build_solver(alu_input):
+    solver = z3.Optimize()
+    digits = [z3.BitVec(f'd{i}', 64) for i in range(14)]
+    for d in digits:
+        solver.add(1 <= d)
+        solver.add(d <= 9)
+    digit_input = iter(digits)
+    memory = {r: 0 for r in 'xyzw'}
+    for i, instruction in enumerate(alu_input):
+        inst = instruction.split()
+        if inst[0] == 'inp':
+            memory[inst[1]] = next(digit_input)
+            continue
+        a, b = inst[1:]
+        b = memory[b] if b in memory else int(b)
+        c = z3.BitVec(f'v{i}', 64)
+        if inst[0] == 'add':
+            solver.add(c == memory[a] + b)
+        elif inst[0] == 'mul':
+            solver.add(c == memory[a] * b)
+        elif inst[0] == 'mod':
+            solver.add(memory[a] >= 0)
+            solver.add(b > 0)
+            solver.add(c == memory[a] % b)
+        elif inst[0] == 'div':
+            solver.add(b != 0)
+            solver.add(c == memory[a] / b)
+        elif inst[0] == 'eql':
+            solver.add(c == z3.If(memory[a] == b, z3.BitVecVal(1, 64), 0))
+        memory[a] = c
+    solver.add(memory['z'] == 0)
+    return digits, solver
+
+
+class ArithmeticLogicUnitTest(unittest.TestCase):
     def test_run_instructions(self):
         alu_input = [
             'inp w',
@@ -76,45 +130,6 @@ class ArithmeticLogicUnit(unittest.TestCase):
         alu_input = read_lines('input_day24.txt')
         self.assertEqual(93959993429899, find_max(alu_input))
 
-
-def find_max(alu_input):
-    solver = z3.Optimize()
-
-    digits = [z3.BitVec(f'd{i}', 64) for i in range(14)]
-    for d in digits:
-        solver.add(1 <= d)
-        solver.add(d <= 9)
-    digit_input = iter(digits)
-
-    registers = {r: 0 for r in 'xyzw'}
-
-    for i, instruction in enumerate(alu_input):
-        inst = instruction.split()
-        if inst[0] == 'inp':
-            registers[inst[1]] = next(digit_input)
-            continue
-        a, b = inst[1:]
-        b = registers[b] if b in registers else int(b)
-        c = z3.BitVec(f'v{i}', 64)
-        if inst[0] == 'add':
-            solver.add(c == registers[a] + b)
-        elif inst[0] == 'mul':
-            solver.add(c == registers[a] * b)
-        elif inst[0] == 'mod':
-            solver.add(registers[a] >= 0)
-            solver.add(b > 0)
-            solver.add(c == registers[a] % b)
-        elif inst[0] == 'div':
-            solver.add(b != 0)
-            solver.add(c == registers[a] / b)
-        elif inst[0] == 'eql':
-            solver.add(c == z3.If(registers[a] == b, z3.BitVecVal(1, 64), 0))
-        registers[a] = c
-    solver.add(registers['z'] == 0)
-    
-    solver.push()
-    solver.maximize(sum((10 ** i) * d for i, d in enumerate(digits[::-1])))
-    if not solver.check() == z3.sat:
-        raise 'Impossible to find a solution!'
-    model = solver.model()
-    return int(''.join([str(model[d]) for d in digits]))
+    def test_puzzle2(self):
+        alu_input = read_lines('input_day24.txt')
+        self.assertEqual(11815671117121, find_min(alu_input))
