@@ -24,6 +24,8 @@
 - [Trench Map](./tests/test_trench_map.py)
 - [Dirac Dice](./tests/test_dirac_dice.py)
 - [Reactor Reboot](./tests/test_reactor_robot.py)
-- [Amphipod](./tests/test_amphipod.py) (second part doesn't work for all the inputs and I solved mine by hand)
-- [Arithmetic Logic Unit [SKIPPED]]()
+- [Amphipod](./tests/test_amphipod.py) 
+  - second part doesn't work for all the inputs and I solved mine by hand
+- [Arithmetic Logic Unit](./tests/test_arithmetic_logic_unit.py) 
+  - I was stuck with this one, I had a look at reddit and discovered the [Z3 Library](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 - [Sea Cucumber](tests/test_sea_cucumber.py)
